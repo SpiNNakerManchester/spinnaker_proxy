@@ -3,7 +3,7 @@ import sys
 
 setup(
     name="spinnaker_proxy",
-    version="0.0.1-dev",
+    version="1.0.0",
     packages=[],
     scripts=["spinnaker_proxy/spinnaker_proxy.py"],
 
@@ -11,6 +11,7 @@ setup(
     author="Jonathan Heathcote",
     description="A proxy-server for SpiNNaker systems.",
     license="GPLv2",
+    url="https://github.com/project-rig/spinnaker_proxy",
 
     # Requirements
     install_requires=["six"],
