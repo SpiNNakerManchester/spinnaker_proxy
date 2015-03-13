@@ -1,59 +1,96 @@
 SpiNNaker Proxy
 ---------------
 
-This small utility implements a simple UDP proxy server for SpiNNaker systems to
-allow booting of SpiNNaker boards over the open internet.
+A small proxy utility which allows reliable basic operation of SpiNNaker boards
+over the open internet.
 
-Though SDP functions correctly over the internet, the SpiNNaker boot protocol
-uses port 54321 which is filtered out by many ISPs. As a result it impossible to
-remotely boot a SpiNNaker board over many real-world internet connections. This
-proxy server is designed to be run within the same LAN as a SpiNNaker board and
-transparently forward packets between remote users and the SpiNNaker system.
+In particular, the proxy enables reliably booting SpiNNaker boards over the open
+internet, a task usually made impossible by the need to communicate via port
+54321 (which is filtered out by many ISPs). On top of this, the boot protocol
+relies on reliable delivery of UDP packets which is simply unrealistic on the
+open internet.
+
+Typical usage is as follows:
+
+                 LAN              .  Internet  .       User's Machine
+                                  .            .
+    +-----------+     +--------+  .            .  +--------+     +-----------+
+    | SpiNNaker |<===>| Proxy  |<================>| Proxy  |<===>| SpiNNaker |
+    | Board     |     | Server |  .            .  | Client |     | Software  |
+    +-----------+     +--------+  .            .  +--------+     +-----------+
+                                  .            .
+Where SpiNNaker software is a tool like
+[ybug](https://github.com/SpiNNakerManchester/ybug) or
+[rig](https://github.com/project-rig/rig).
+
+By transmitting boot packets using a different port number between the proxy
+client and server, the packets are not stripped out by most ISPs. Further, the
+proxy can use TCP to send boot packets between the client and server to ensure
+no packets are dropped while crossing the internet.
 
 Installation
 ------------
 
-    python setup.py install
-
-or
+The proxy can be installed from
+[PyPi](https://pypi.python.org/pypi/spinnaker_proxy) as follows:
 
     pip install spinnaker_proxy
 
+Alternatively, you can install the script manually using setuptools from a
+checked out copy of this repository:
 
-Usage
------
+    python setup.py install
 
-Set up a proxy for a SpiNNaker board (but not a BMP):
+Quick-Start
+-----------
 
-    spinnaker_proxy.py SPINN_HOSTNAME
+On a machine on the same LAN as the SpiNNaker machine you wish to use, run the
+following to start an instance of the proxy server:
 
-Where `SPINN_HOSTNAME` is the hostname of the board to proxy.
+    spinnaker_proxy.py -s SPINN_HOSTNAME
 
-Alternatively, a BMP can also be proxied:
+Where `SPINN_HOSTNAME` is the hostname of the SpiNNaker board. On the machine
+you are running SpiNNaker software:
 
-    spinnaker_proxy.py SPINN_HOSTNAME BMP_HOSTNAME
+    spinnaker_proxy.py -c PROXY_SERVER_HOSTNAME
 
-Where `SPINN_HOSTNAME` is the hostname of the board to proxy and `BMP_HOSTNAME`
-is the hostname of the BMP to proxy.
+Where `PROXY_SERVER_HOSTNAME` is the hostname of the machine you started the
+proxy server on.  You can now point your SpiNNaker software at `localhost` and
+everything should work normally.
+
+### Reliable Booting: TCP Tunneling
+
+The proxy can optionally tunnel boot commands via a TCP connection. To do this
+simply add the `-t` flag to both the proxy server and client:
+
+    # Proxy Server
+    spinnaker_proxy.py -s -t SPINN_HOSTNAME
+    
+    # Proxy Client
+    spinnaker_proxy.py -c -t PROXY_HOSTNAME
 
 
 Default Ports
 -------------
 
-By default the following ports are opened by the proxy:
+By default the following ports are used between the proxy server and client.
 
-Port  | Destination            | Description
------ | ---------------------- | ------------------------
-17894 | `SPINN_HOSTNAME`:17893 | SpiNNaker SCP port
-17895 | `BMP_HOSTNAME`:17893   | BMP SCP port
-17896 | `SPINN_HOSTNAME`:54321 | SpiNNaker boot port
+Port  | Description
+----- | ------------
+17894 | SCP packets
+17895 | Boot packets
 
-See `--help` for details on how to change these mappings.
+These can be changed using command line options which can be listed using
+`spinnaker_proxy.py --help`.
 
 
-Warning
--------
+Warnings
+--------
 
-This proxy will behave oddly if there are multiple simultaneous users. Since
-SpiNNaker boards also tend to do the same in these circumstances, this is not
-considered a problem.
+The proxy will only forward SCP and boot commands. To send/recieve SDP packets
+to/from a machine you should communicate directly with the machine, bypassing
+the proxy.
+
+The proxy server will behave oddly if mutliple proxy clients attempt to connect.
+
+The proxy client will behave oddly if mutliple applications attempt to connect.
