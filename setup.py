@@ -3,7 +3,7 @@ import sys
 
 setup(
     name="spinnaker_proxy",
-    version="1.0.0",
+    version="2.0.1",
     packages=[],
     scripts=["spinnaker_proxy/spinnaker_proxy.py"],
 

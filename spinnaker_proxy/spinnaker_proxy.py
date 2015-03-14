@@ -262,7 +262,7 @@ class TCPtoUDP(DatagramProxy):
         # connected)
         self.tcp_sock = None
         
-        self.tcp_protocol = TCPDatagramProtocol()
+        self.tcp_protocol = None
         
         self.udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.udp_sock.connect(udp_address)
@@ -272,6 +272,7 @@ class TCPtoUDP(DatagramProxy):
             self.tcp_sock.close()
         
         self.tcp_sock, address = self.tcp_listen_sock.accept()
+        self.tcp_protocol = TCPDatagramProtocol()
         logging.info("New TCP connection from {}".format(address))
     
     def udp_to_tcp(self):
