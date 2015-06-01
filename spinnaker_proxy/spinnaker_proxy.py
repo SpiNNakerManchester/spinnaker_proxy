@@ -157,7 +157,7 @@ class UDPtoUDP(DatagramProxy):
             self.ext_sock.sendto(datagram, self.ext_address)
         else:
             logging.warning(
-                "UDPtoTCP: Got UDP data before UDP 'connection' made.")
+                "UDPtoUDP: Got UDP data before UDP 'connection' made.")
     
     def get_select_handlers(self):
         return {
@@ -213,6 +213,7 @@ class UDPtoTCP(DatagramProxy):
     def tcp_to_udp(self):
         """Unpack received TCP data and forward any datagrams over UDP."""
         data = self.tcp_sock.recv(self.bufsize)
+        assert len(data) > 0, "Remote socket closed prematurely."
         for datagram in self.tcp_protocol.recv(data):
             # Forward the datagram to the last UDP address received from
             if self.udp_address is not None:
@@ -285,8 +286,13 @@ class TCPtoUDP(DatagramProxy):
     
     def tcp_to_udp(self):
         data = self.tcp_sock.recv(self.bufsize)
-        for datagram in self.tcp_protocol.recv(data):
-            self.udp_sock.send(datagram)
+        if data == "":
+            # Socket closed.
+            self.tcp_sock.close()
+            self.tcp_sock = None
+        else:
+            for datagram in self.tcp_protocol.recv(data):
+                self.udp_sock.send(datagram)
     
     def get_select_handlers(self):
         handlers = {
