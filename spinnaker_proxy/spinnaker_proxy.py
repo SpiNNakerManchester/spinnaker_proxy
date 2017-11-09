@@ -105,10 +105,10 @@ class UDPtoUDP(DatagramProxy):
     """A UDP to UDP proxy.
 
     This proxy listens on an "external" UDP port and awaits the arrival of UDP
-    datagrams. These datagrams are transparently forwarded to the "internal" UDP
-    address upon arrival. If any UDP datagrams are received back from the internal
-    connection, these are forwarded to the most recent external host to send a
-    UDP datagram to the external UDP port.
+    datagrams. These datagrams are transparently forwarded to the "internal"
+    UDP address upon arrival. If any UDP datagrams are received back from the
+    internal connection, these are forwarded to the most recent external host
+    to send a UDP datagram to the external UDP port.
 
     This proxy essentially allows port numbers to be changed.
     """
@@ -169,8 +169,8 @@ class UDPtoTCP(DatagramProxy):
     datagram is received from the TCP connection, a UDP datagram is sent to the
     last address a UDP datagram was received from.
 
-    Since TCP is stream-based not datagram-based, each datagram is prefixed with
-    a 32-bit number indicating the datagram's length in bytes.
+    Since TCP is stream-based not datagram-based, each datagram is prefixed
+    with a 32-bit number indicating the datagram's length in bytes.
 
     If the TCP connection is closed, this proxy will raise an exception when it
     next attempts to forward a datagram.
@@ -231,8 +231,8 @@ class TCPtoUDP(DatagramProxy):
     specified destination. UDP datagrams received are forwarded down the TCP
     connection.
 
-    Since TCP is stream-based not datagram-based, each datagram is prefixed with
-    a 32-bit number indicating the datagram's length in bytes.
+    Since TCP is stream-based not datagram-based, each datagram is prefixed
+    with a 32-bit number indicating the datagram's length in bytes.
 
     When a connection is made to the TCP server, all previous TCP connections
     are closed.
@@ -324,16 +324,19 @@ def run_proxy(datagram_proxies):
             select_handlers[sock]()
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="A 'tunnel' proxy for connecting to remote SpiNNaker boards.")
+        description="A 'tunnel' proxy for connecting to remote SpiNNaker "
+        "boards.")
 
     parser.add_argument("target", type=str,
-                        help="target hostname (i.e. SpiNNaker board or another proxy)")
+                        help="target hostname (i.e. SpiNNaker board or "
+                        "another proxy)")
 
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-s", "--server", action="store_true",
-                       help="act as a proxy server (target should be a SpiNNaker machine)")
+                       help="act as a proxy server (target should be a "
+                       "SpiNNaker machine)")
     group.add_argument("-c", "--client", action="store_true",
                        help="connect to a proxy server")
 
@@ -347,9 +350,11 @@ if __name__=="__main__":
                         help="SCP port number used by SpiNNaker boards")
     parser.add_argument("--boot-port", type=int, default=BOOT_PORT,
                         help="Port number used to boot SpiNNaker boards")
-    parser.add_argument("--scp-tunnel-port", type=int, default=SCP_TUNNEL_PORT,
+    parser.add_argument("--scp-tunnel-port", type=int,
+                        default=SCP_TUNNEL_PORT,
                         help="Port number for tunnelling SCP data")
-    parser.add_argument("--boot-tunnel-port", type=int, default=BOOT_TUNNEL_PORT,
+    parser.add_argument("--boot-tunnel-port", type=int,
+                        default=BOOT_TUNNEL_PORT,
                         help="Port number for tunnelling boot data")
 
     parser.add_argument("-q", "--quiet", action="store_true",
