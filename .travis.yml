@@ -1,0 +1,30 @@
+dist: trusty
+sudo: false
+language: python
+python:
+  - 2.7
+  - 3.5
+  - 3.6
+cache: pip
+virtualenv:
+  system_site_packages: true
+
+before_install:
+  - pip install --upgrade pip setuptools wheel
+install:
+  - python setup.py develop
+
+before_script:
+  - pip install -r requirements-test.txt
+  - pip install python-coveralls
+script:
+  # - py.test .
+  ### Code quality check
+  - flake8 spinnaker_proxy
+  # - cd doc/source
+  # - sphinx-build -T -E -b html -d _build/doctrees-readthedocsdirhtml -D language=en . _build/html
+  # - sphinx-build -T -b json -d _build/doctrees-json -D language=en . _build/json
+  # - sphinx-build -T -b singlehtml -d _build/doctrees-readthedocssinglehtmllocalmedia -D language=en . _build/localmedia
+
+# after_success:
+#   - coveralls
