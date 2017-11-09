@@ -36,10 +36,14 @@ def udp_socket(bind_port=None, connect_address=None):
     :rtype: socket.SocketType
     """
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    if bind_port is not None:
-        sock.bind(("", bind_port))
-    if connect_address is not None:
-        sock.connect(connect_address)
+    try:
+        if bind_port is not None:
+            sock.bind(("", bind_port))
+        if connect_address is not None:
+            sock.connect(connect_address)
+    except Exception as e:
+        sock.close()
+        raise e
     return sock
 
 
@@ -55,12 +59,16 @@ def tcp_socket(bind_port=None, connect_address=None):
     :rtype: socket.SocketType
     """
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    if bind_port is not None:
-        sock.setsockopt(
-            socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.bind(("", bind_port))
-    if connect_address is not None:
-        sock.connect(connect_address)
+    try:
+        if bind_port is not None:
+            sock.setsockopt(
+                socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.bind(("", bind_port))
+        if connect_address is not None:
+            sock.connect(connect_address)
+    except Exception as e:
+        sock.close()
+        raise e
     return sock
 
 
@@ -123,8 +131,12 @@ class UDPtoUDP(DatagramProxy):
         }
 
     def close(self):
-        self.ext_sock.close()
-        self.int_sock.close()
+        if self.ext_sock:
+            self.ext_sock.close()
+            self.ext_sock = None
+        if self.int_sock:
+            self.int_sock.close()
+            self.int_sock = None
 
 
 class UDPtoTCP(DatagramProxy):
@@ -159,7 +171,11 @@ class UDPtoTCP(DatagramProxy):
         self.udp_address = None
 
         # The TCP (client) socket
-        self.tcp_sock = tcp_socket(connect_address=tcp_address)
+        try:
+            self.tcp_sock = tcp_socket(connect_address=tcp_address)
+        except Exception as e:
+            self.udp_sock.close()
+            raise e
 
         #: How to handle messages in the proxy protocol
         self.tcp_protocol = TCPDatagramProtocol()
@@ -181,7 +197,10 @@ class UDPtoTCP(DatagramProxy):
         """ Unpack received TCP data and forward any datagrams over UDP.
         """
         data = self.tcp_sock.recv(self.bufsize)
-        assert len(data) > 0, "Remote socket closed prematurely."
+        if len(data) == 0:
+            # A zero read means we're done
+            self.close()
+            return
         for datagram in self.tcp_protocol.recv(data):
             # Forward the datagram to the last UDP address received from
             if self.udp_address is None:
@@ -196,8 +215,12 @@ class UDPtoTCP(DatagramProxy):
         }
 
     def close(self):
-        self.udp_sock.close()
-        self.tcp_sock.close()
+        if self.udp_sock:
+            self.udp_sock.close()
+            self.udp_sock = None
+        if self.tcp_sock:
+            self.tcp_sock.close()
+            self.tcp_sock = None
 
 
 class TCPtoUDP(DatagramProxy):
@@ -237,14 +260,21 @@ class TCPtoUDP(DatagramProxy):
         #: How to handle messages in the proxy protocol
         self.tcp_protocol = None
         #: The UDP socket
-        self.udp_sock = udp_socket(connect_address=udp_address)
+        try:
+            self.udp_sock = udp_socket(connect_address=udp_address)
+        except Exception as e:
+            self.tcp_sock.close()
+            raise e
+
+    def _close_sock(self):
+        if self.tcp_sock is not None:
+            self.tcp_sock.close()
+            self.tcp_sock = None
 
     def on_connect(self):
         """ Callback to handle new TCP connections.
         """
-        if self.tcp_sock is not None:
-            self.tcp_sock.close()
-
+        self._close_sock()
         self.tcp_sock, address = self.tcp_listen_sock.accept()
         self.tcp_protocol = TCPDatagramProtocol()
         logging.info("new TCP connection from {}".format(address))
@@ -254,7 +284,7 @@ class TCPtoUDP(DatagramProxy):
         """
         datagram = self.udp_sock.recv(self.bufsize)
         if self.tcp_sock is None:
-            logging.warning("got UDP data before TCP connection made")
+            logging.warning("got UDP data when TCP connection not made")
             return
         self.tcp_sock.send(self.tcp_protocol.send(datagram))
 
@@ -262,28 +292,26 @@ class TCPtoUDP(DatagramProxy):
         """ Unpack received TCP data and forward any datagrams over UDP.
         """
         data = self.tcp_sock.recv(self.bufsize)
-        if data == "":
+        if data == b"":
             # Socket closed.
-            self.tcp_sock.close()
-            self.tcp_sock = None
+            self._close_sock()
         else:
             for datagram in self.tcp_protocol.recv(data):
                 self.udp_sock.send(datagram)
 
     def get_select_handlers(self):
-        handlers = {
+        return {
             self.udp_sock: self.udp_to_tcp,
             self.tcp_listen_sock: self.on_connect,
+            self.tcp_sock: self.tcp_to_udp
         }
 
-        if self.tcp_sock is not None:
-            handlers[self.tcp_sock] = self.tcp_to_udp
-
-        return handlers
-
     def close(self):
-        self.udp_sock.close()
-        self.tcp_listen_sock.close()
-
-        if self.tcp_sock is not None:
-            self.tcp_sock.close()
+        if self.udp_sock:
+            self.udp_sock.close()
+            self.udp_sock = None
+        if self.tcp_listen_sock:
+            self.tcp_listen_sock.close()
+            self.tcp_listen_sock = None
+        if self.tcp_sock:
+            self._close_sock()

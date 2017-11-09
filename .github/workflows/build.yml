@@ -47,7 +47,7 @@ jobs:
         pip install -r requirements-test.txt
 
     - name: Lint with flake8
-      run: flake8 spinnaker_proxy
+      run: flake8 spinnaker_proxy unittests
     - name: Lint with pylint
       uses: ./support/actions/pylint
       with: 
@@ -55,7 +55,6 @@ jobs:
 
   python-test:
     name: Python Test
-    if: false
     runs-on: ubuntu-latest
     strategy:
       matrix:

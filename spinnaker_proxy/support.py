@@ -75,12 +75,13 @@ class DatagramProxy(object, metaclass=Abstract):
 
     @abstractmethod
     def get_select_handlers(self):
-        """ List the sockets to select on and their on-readable handlers.
+        """ List the file descriptors of sockets to select on and their\
+            on-readable handlers.
 
         :return:
             All sockets should be selected for readability, and, when
             readable, that callback should be called.
-        :rtype: dict(socket.SocketType, ~collections.abc.Callable)
+        :rtype: dict(int, ~collections.abc.Callable)
         """
         raise NotImplementedError
 
