@@ -5,11 +5,8 @@
 import argparse
 import logging
 from select import select
-from six import iteritems
 import socket
 import struct
-import sys
-import threading
 
 
 SCP_PORT = 17893
