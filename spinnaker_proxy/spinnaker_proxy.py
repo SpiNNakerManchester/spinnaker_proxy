@@ -36,14 +36,16 @@ def run_proxies(datagram_proxies):
             select_handlers.update(p.get_select_handlers())
 
         # Wait for data to arrive on any socket
-        readers, writers, errs = select(list(select_handlers), [], [])
+        readers, _writers, _errs = select(list(select_handlers), [], [])
 
         # Handle the data
         for sock in readers:
             select_handlers[sock]()
 
 
-if __name__ == "__main__":
+def _main_program():
+    """ The main program. Assumes that it is only ever called from this file.
+    """
     parser = argparse.ArgumentParser(
         description="A 'tunnel' proxy for connecting to remote SpiNNaker "
         "boards.")
@@ -108,3 +110,7 @@ if __name__ == "__main__":
     finally:
         for p in datagram_proxies:
             p.close()
+
+
+if __name__ == "__main__":
+    _main_program()

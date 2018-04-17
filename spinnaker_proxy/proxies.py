@@ -1,3 +1,6 @@
+""" The implementations of the proxy classes.
+"""
+
 import logging
 import socket
 
@@ -6,14 +9,54 @@ from .support import DatagramProxy, TCPDatagramProtocol
 DEFAULT_BUFFER_SIZE = 4096
 
 
-class UDPtoUDP(DatagramProxy):
-    """A UDP to UDP proxy.
+def udp_socket(bind_port=None, connect_address=None):
+    """ How to make a UDP socket.
 
-    This proxy listens on an "external" UDP port and awaits the arrival of UDP
-    datagrams. These datagrams are transparently forwarded to the "internal"
-    UDP address upon arrival. If any UDP datagrams are received back from the
-    internal connection, these are forwarded to the most recent external host
-    to send a UDP datagram to the external UDP port.
+    :param bind_port: \
+        If provided, what local port to send and receive packets via.
+    :type bind_port: int
+    :param connect_address: \
+        If provided, what remote IP address/port to send packets to and\
+        receive them from.
+    :type connect_address: tuple(str,int)
+    """
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    if bind_port is not None:
+        sock.bind(("", bind_port))
+    if connect_address is not None:
+        sock.connect(connect_address)
+    return sock
+
+
+def tcp_socket(bind_port=None, connect_address=None):
+    """ How to make a TCP socket.
+
+    :param bind_port: \
+        If provided, what local port to send and receive data via.
+    :type bind_port: int
+    :param connect_address: \
+        If provided, what remote IP address/port to send data to and\
+        receive it from.
+    :type connect_address: tuple(str,int)
+    """
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    if bind_port is not None:
+        sock.setsockopt(
+            socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.bind(("", bind_port))
+    if connect_address is not None:
+        sock.connect(connect_address)
+    return sock
+
+
+class UDPtoUDP(DatagramProxy):
+    """ A UDP to UDP proxy.
+
+    This proxy listens on an "external" UDP port and awaits the arrival of\
+    UDP datagrams. These datagrams are transparently forwarded to the\
+    "internal" UDP address upon arrival. If any UDP datagrams are received\
+    back from the internal connection, these are forwarded to the most recent\
+    external host to send a UDP datagram to the external UDP port.
 
     This proxy essentially allows port numbers to be changed.
     """
@@ -22,16 +65,14 @@ class UDPtoUDP(DatagramProxy):
                  bufsize=DEFAULT_BUFFER_SIZE):
         self.bufsize = bufsize
 
-        self.ext_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.ext_sock.bind(("", ext_udp_port))
+        self.ext_sock = udp_socket(bind_port=ext_udp_port)
         self.ext_address = None
 
-        self.int_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.int_sock.connect(int_udp_address)
+        self.int_sock = udp_socket(connect_address=int_udp_address)
 
     def ext_to_int(self):
-        """Forward a UDP datagram arriving from the external socket to the
-        internal socket."""
+        """ Forward a UDP datagram arriving from the external socket to the\
+            internal socket."""
         # Receive the external datagram, recording the originating address of
         # the packet (to allow directing of return packets)
         datagram, ext_address = self.ext_sock.recvfrom(self.bufsize)
@@ -43,8 +84,8 @@ class UDPtoUDP(DatagramProxy):
         self.int_sock.send(datagram)
 
     def int_to_ext(self):
-        """Forward a UDP datagram arriving from the internal socket to the
-        external socket."""
+        """ Forward a UDP datagram arriving from the internal socket to the\
+            external socket."""
         # Receive the internal datagram
         datagram = self.int_sock.recv(self.bufsize)
 
@@ -70,33 +111,32 @@ class UDPtoUDP(DatagramProxy):
 class UDPtoTCP(DatagramProxy):
     """Forward UDP datagrams over a TCP connection.
 
-    This proxy listens on a UDP port and connects to a TCP server. When a UDP
-    datagram is received, it is forwarded down the TCP connection. When a
-    datagram is received from the TCP connection, a UDP datagram is sent to the
-    last address a UDP datagram was received from.
+    This proxy listens on a UDP port and connects to a TCP server. When a UDP\
+    datagram is received, it is forwarded down the TCP connection. When a\
+    datagram is received from the TCP connection, a UDP datagram is sent to\
+    the last address a UDP datagram was received from.
 
-    Since TCP is stream-based not datagram-based, each datagram is prefixed
+    Since TCP is stream-based not datagram-based, each datagram is prefixed\
     with a 32-bit number indicating the datagram's length in bytes.
 
-    If the TCP connection is closed, this proxy will raise an exception when it
-    next attempts to forward a datagram.
+    If the TCP connection is closed, this proxy will raise an exception when\
+    it next attempts to forward a datagram.
     """
 
     def __init__(self, udp_port, tcp_address,
                  bufsize=DEFAULT_BUFFER_SIZE):
         self.bufsize = bufsize
 
-        self.udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.udp_sock.bind(("", udp_port))
+        self.udp_sock = udp_socket(bind_port=udp_port)
         self.udp_address = None
 
-        self.tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.tcp_sock.connect(tcp_address)
+        self.tcp_sock = tcp_socket(connect_address=tcp_address)
 
         self.tcp_protocol = TCPDatagramProtocol()
 
     def udp_to_tcp(self):
-        """Forward received UDP datagrams over TCP."""
+        """ Forward received UDP datagrams over TCP.
+        """
         # Receive the datagram, recording the originating address of the packet
         # (to allow directing of return packets)
         datagram, udp_address = self.udp_sock.recvfrom(self.bufsize)
@@ -108,7 +148,8 @@ class UDPtoTCP(DatagramProxy):
         self.tcp_sock.send(self.tcp_protocol.send(datagram))
 
     def tcp_to_udp(self):
-        """Unpack received TCP data and forward any datagrams over UDP."""
+        """ Unpack received TCP data and forward any datagrams over UDP.
+        """
         data = self.tcp_sock.recv(self.bufsize)
         assert len(data) > 0, "Remote socket closed prematurely."
         for datagram in self.tcp_protocol.recv(data):
@@ -130,17 +171,17 @@ class UDPtoTCP(DatagramProxy):
 
 
 class TCPtoUDP(DatagramProxy):
-    """Unpack datagrams sent over a TCP connection into UDP datagrams.
+    """ Unpack datagrams sent over a TCP connection into UDP datagrams.
 
-    This proxy sets up a TCP server and 'connects' to a specified UDP address.
-    Datagrams sent to the TCP server are forwarded as UDP datagrams to the
-    specified destination. UDP datagrams received are forwarded down the TCP
-    connection.
+    This proxy sets up a TCP server and 'connects' to a specified UDP\
+    address. Datagrams sent to the TCP server are forwarded as UDP datagrams\
+    to the specified destination. UDP datagrams received are forwarded down\
+    the TCP connection.
 
-    Since TCP is stream-based not datagram-based, each datagram is prefixed
+    Since TCP is stream-based not datagram-based, each datagram is prefixed\
     with a 32-bit number indicating the datagram's length in bytes.
 
-    When a connection is made to the TCP server, all previous TCP connections
+    When a connection is made to the TCP server, all previous TCP connections\
     are closed.
     """
 
@@ -149,11 +190,7 @@ class TCPtoUDP(DatagramProxy):
         self.bufsize = bufsize
 
         # The TCP server
-        self.tcp_listen_sock = socket.socket(socket.AF_INET,
-                                             socket.SOCK_STREAM)
-        self.tcp_listen_sock.setsockopt(socket.SOL_SOCKET,
-                                        socket.SO_REUSEADDR, 1)
-        self.tcp_listen_sock.bind(("", tcp_port))
+        self.tcp_listen_sock = tcp_socket(bind_port=tcp_port)
         self.tcp_listen_sock.listen(1)
 
         # The most recently connected socket to the server (or None if not
@@ -161,11 +198,11 @@ class TCPtoUDP(DatagramProxy):
         self.tcp_sock = None
 
         self.tcp_protocol = None
-
-        self.udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.udp_sock.connect(udp_address)
+        self.udp_sock = udp_socket(connect_address=udp_address)
 
     def on_connect(self):
+        """ Callback to handle new TCP connections.
+        """
         if self.tcp_sock is not None:
             self.tcp_sock.close()
 
@@ -174,6 +211,8 @@ class TCPtoUDP(DatagramProxy):
         logging.info("new TCP connection from {}".format(address))
 
     def udp_to_tcp(self):
+        """ Forward received UDP datagrams over TCP.
+        """
         datagram = self.udp_sock.recv(self.bufsize)
         if self.tcp_sock is None:
             logging.warning("got UDP data before TCP connection made")
@@ -181,6 +220,8 @@ class TCPtoUDP(DatagramProxy):
         self.tcp_sock.send(self.tcp_protocol.send(datagram))
 
     def tcp_to_udp(self):
+        """ Unpack received TCP data and forward any datagrams over UDP.
+        """
         data = self.tcp_sock.recv(self.bufsize)
         if data == "":
             # Socket closed.

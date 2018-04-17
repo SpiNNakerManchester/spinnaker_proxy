@@ -2,13 +2,13 @@ SpiNNaker Proxy
 ---------------
 
 A small proxy utility which allows reliable basic operation of SpiNNaker boards
-over the open internet.
+over the open Internet.
 
 In particular, the proxy enables reliably booting SpiNNaker boards over the open
-internet, a task usually made impossible by the need to communicate via port
+Internet, a task usually made impossible by the need to communicate via port
 54321 (which is filtered out by many ISPs). On top of this, the boot protocol
 relies on reliable delivery of UDP packets which is simply unrealistic on the
-open internet.
+open Internet.
 
 Typical usage is as follows:
 
@@ -20,13 +20,13 @@ Typical usage is as follows:
     +-----------+     +--------+  .            .  +--------+     +-----------+
                                   .            .
 Where SpiNNaker software is a tool like
-[ybug](https://github.com/SpiNNakerManchester/ybug) or
-[rig](https://github.com/project-rig/rig).
+[ybug](https://github.com/SpiNNakerManchester/spinnaker_tools) or
+[sPyNNaker](https://github.com/SpiNNakerManchester/sPyNNaker8).
 
 By transmitting boot packets using a different port number between the proxy
 client and server, the packets are not stripped out by most ISPs. Further, the
 proxy can use TCP to send boot packets between the client and server to ensure
-no packets are dropped while crossing the internet.
+no packets are dropped while crossing the Internet.
 
 Installation
 ------------
@@ -58,7 +58,7 @@ Where `PROXY_SERVER_HOSTNAME` is the hostname of the machine you started the
 proxy server on.  You can now point your SpiNNaker software at `localhost` and
 everything should work normally.
 
-### Reliable Booting: TCP Tunneling
+### Reliable Booting: TCP Tunnelling
 
 The proxy can optionally tunnel boot commands via a TCP connection. To do this
 simply add the `-t` flag to both the proxy server and client:
@@ -87,10 +87,10 @@ These can be changed using command line options which can be listed using
 Warnings
 --------
 
-The proxy will only forward SCP and boot commands. To send/recieve SDP packets
+The proxy will only forward SCP and boot commands. To send/receive SDP packets
 to/from a machine you should communicate directly with the machine, bypassing
 the proxy.
 
-The proxy server will behave oddly if mutliple proxy clients attempt to connect.
+The proxy server will behave oddly if multiple proxy clients attempt to connect.
 
-The proxy client will behave oddly if mutliple applications attempt to connect.
+The proxy client will behave oddly if multiple applications attempt to connect.
