@@ -109,7 +109,7 @@ class UDPtoUDP(DatagramProxy):
 
 
 class UDPtoTCP(DatagramProxy):
-    """Forward UDP datagrams over a TCP connection.
+    """ Forward UDP datagrams over a TCP connection.
 
     This proxy listens on a UDP port and connects to a TCP server. When a UDP\
     datagram is received, it is forwarded down the TCP connection. When a\
