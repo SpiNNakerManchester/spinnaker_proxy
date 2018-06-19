@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-"""A proxy for SpiNNaker boards."""
+""" A proxy for SpiNNaker boards.
+"""
 
 import argparse
 import logging
@@ -10,24 +11,26 @@ from .proxies import TCPtoUDP, UDPtoTCP, UDPtoUDP
 
 
 SCP_PORT = 17893
-"""Port used for SCP communications."""
+""" Port used for SCP communications.
+"""
 
 SCP_TUNNEL_PORT = 17894
-"""Port used for tunnelling SCP communications."""
+""" Port used for tunnelling SCP communications.
+"""
 
 BOOT_PORT = 54321
-"""Port used to boot a SpiNNaker machine"""
+""" Port used to boot a SpiNNaker machine.
+"""
 
 BOOT_TUNNEL_PORT = 17895
-"""Port used for tunnelling boot packets."""
+""" Port used for tunnelling boot packets.
+"""
 
 
 def run_proxies(datagram_proxies):
-    """Run a given set of proxy servers indefinitely.
+    """ Run a given set of proxy servers indefinitely.
 
-    Parameters
-    ----------
-    datagram_proxies : [:py:class:`DatagramProxy`, ...]
+    :type datagram_proxies: iterable(:py:class:`DatagramProxy`)
     """
     while True:
         # Find out which sockets to select on
