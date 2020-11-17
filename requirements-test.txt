@@ -2,5 +2,4 @@
 pytest>=2.8
 pytest-cov
 pytest-timeout
-flake8
 mock
