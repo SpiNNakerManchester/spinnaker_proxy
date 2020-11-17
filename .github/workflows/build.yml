@@ -16,9 +16,7 @@
 name: Build
 on: [push]
 env:
-  DO_DOC: false
-  DO_TEST: false
-  DOC_VERSION: 3.6
+  PRIMARY_VERSION: 3.6
 
 jobs:
   python-quality-control:
@@ -57,7 +55,7 @@ jobs:
 
   python-test:
     name: Python Test
-    if: ${{ env.DO_TEST == "true" }}
+    if: false
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -84,14 +82,14 @@ jobs:
         pip install -r requirements-test.txt
 
     - name: Test with pytest and coverage
-      if: matrix.python-version == 3.6
+      if: matrix.python-version == env.PRIMARY_VERSION
       run: pytest unittests --cov spinnaker_proxy
     - name: Test with pytest
-      if: matrix.python-version != 3.6
+      if: matrix.python-version != env.PRIMARY_VERSION
       run: pytest unittests
 
     - name: Run coveralls and report coverage
-      if: matrix.python-version == 3.6
+      if: matrix.python-version == env.PRIMARY_VERSION
       env:
         COVERALLS_SERVICE_NAME: 'GitHub CI'
         COVERALLS_REPO_TOKEN : ${{ secrets.COVERALLS_REPO_TOKEN }}
@@ -101,12 +99,12 @@ jobs:
   documentation:
     name: Documentation Check
     runs-on: ubuntu-latest
-    if: ${{ env.DO_DOC == "true" }}
+    if: false
     steps:
-    - name: Set up Python ${{ env.DOC_VERSION }}
+    - name: Set up Python ${{ env.PRIMARY_VERSION }}
       uses: actions/setup-python@v2
       with:
-        python-version: ${{ env.DOC_VERSION }}
+        python-version: ${{ env.PRIMARY_VERSION }}
     - name: Checkout
       uses: actions/checkout@v2
     - name: Upgrade pip, install test tooling
