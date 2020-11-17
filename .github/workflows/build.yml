@@ -57,7 +57,7 @@ jobs:
 
   python-test:
     name: Python Test
-    if: env.DO_TEST
+    if: ${{ env.DO_TEST == "true" }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -101,7 +101,7 @@ jobs:
   documentation:
     name: Documentation Check
     runs-on: ubuntu-latest
-    if: env.DO_DOC
+    if: ${{ env.DO_DOC == "true" }}
     steps:
     - name: Set up Python ${{ env.DOC_VERSION }}
       uses: actions/setup-python@v2
