@@ -14,22 +14,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 name: Build
-
 on: [push]
+env:
+  DO_DOC: false
+  DO_TEST: false
+  DOC_VERSION: 3.6
 
 jobs:
-  build:
+  python-quality-control:
+    name: Python Version-Dependent Quality Control
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [2.7, 3.6, 3.7, 3.8]
-
     steps:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-
     - name: Checkout
       uses: actions/checkout@v2
     - name: Checkout SupportScripts
@@ -37,55 +39,102 @@ jobs:
       with:
         repository: SpiNNakerManchester/SupportScripts
         path: support
-
     - name: Upgrade pip, install test tooling
       run: |
         python -m pip install --upgrade pip setuptools wheel
         pip install -r .github/requirements-tooling.txt
-
     - name: Install
       run: |
         python setup.py develop
         pip install -r requirements-test.txt
 
-#    - name: Test with pytest and coverage
-#      if: matrix.python-version == 3.6
-#      run: |
-#        pytest unittests --cov spinnaker_proxy
-#
-#    - name: Test with pytest
-#      if: matrix.python-version != 3.6
-#      run: |
-#        pytest unittests
-
     - name: Lint with flake8
-      run: |
-        # run flake8
-        flake8 spinnaker_proxy
-
+      run: flake8 spinnaker_proxy
     - name: Lint with pylint
       # Note that there's special conditioning of the return code of pylint
       run: |
         pylint --output-format=colorized --disable=R,C spinnaker_proxy || exit $(($? & 35))
 
-    - name: Run rat copyright enforcement
-      if: matrix.python-version == 3.6
+  python-test:
+    name: Python Test
+    if: env.DO_TEST
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [2.7, 3.6, 3.7, 3.8]
+    steps:
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Checkout SupportScripts
+      uses: actions/checkout@v2
+      with:
+        repository: SpiNNakerManchester/SupportScripts
+        path: support
+    - name: Upgrade pip, install test tooling
       run: |
-        support/rat.sh download
-        support/rat.sh run
+        python -m pip install --upgrade pip setuptools wheel
+        pip install -r .github/requirements-tooling.txt
+    - name: Install
+      run: |
+        python setup.py develop
+        pip install -r requirements-test.txt
 
-#    - name: Build documentation with sphinx
-#      if: matrix.python-version == 3.6
-#      run: |
-#        sphinx-build -W -T -E -b html -d _build/doctrees-readthedocsdirhtml -D language=en . _build/html
-#        sphinx-build -W -T -b json -d _build/doctrees-json -D language=en . _build/json
-#        sphinx-build -W -T -b singlehtml -d _build/doctrees-readthedocssinglehtmllocalmedia -D language=en . _build/localmedia
-#      working-directory: doc/source
+    - name: Test with pytest and coverage
+      if: matrix.python-version == 3.6
+      run: pytest unittests --cov spinnaker_proxy
+    - name: Test with pytest
+      if: matrix.python-version != 3.6
+      run: pytest unittests
 
-#    - name: Run coveralls and report coverage
-#      if: matrix.python-version == 3.6
-#      env:
-#        COVERALLS_SERVICE_NAME: 'GitHub CI'
-#        COVERALLS_REPO_TOKEN : ${{ secrets.COVERALLS_REPO_TOKEN }}
-#        NODE_COVERALLS_DEBUG: 1
-#      run: coveralls
+    - name: Run coveralls and report coverage
+      if: matrix.python-version == 3.6
+      env:
+        COVERALLS_SERVICE_NAME: 'GitHub CI'
+        COVERALLS_REPO_TOKEN : ${{ secrets.COVERALLS_REPO_TOKEN }}
+        NODE_COVERALLS_DEBUG: 1
+      run: coveralls
+
+  documentation:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    if: env.DO_DOC
+    steps:
+    - name: Set up Python ${{ env.DOC_VERSION }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ env.DOC_VERSION }}
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Upgrade pip, install test tooling
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        pip install -r .github/requirements-tooling.txt
+    - name: Install
+      run: |
+        python setup.py develop
+        pip install -r requirements-test.txt
+    - name: Build documentation with sphinx
+      run: |
+        sphinx-build -W -T -E -b html -d _build/doctrees-readthedocsdirhtml -D language=en . _build/html
+        sphinx-build -W -T -b json -d _build/doctrees-json -D language=en . _build/json
+        sphinx-build -W -T -b singlehtml -d _build/doctrees-readthedocssinglehtmllocalmedia -D language=en . _build/localmedia
+      working-directory: doc/source
+
+  copyright-check:
+    name: Copyright Check
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Checkout SupportScripts
+      uses: actions/checkout@v2
+      with:
+        repository: SpiNNakerManchester/SupportScripts
+        path: support
+    - name: Set up
+      run: support/rat.sh download
+    - name: Run rat copyright enforcement
+      run: support/rat.sh run
