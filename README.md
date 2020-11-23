@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/SpiNNakerManchester/spinnaker_proxy.svg?branch=master)](https://travis-ci.org/SpiNNakerManchester/spinnaker_proxy)
+[![Build Status](https://github.com/SpiNNakerManchester/spinnaker_proxy/workflows/Build/badge.svg?branch=master)](https://github.com/SpiNNakerManchester/spinnaker_proxy/actions?query=workflow%3A%22Build%22+branch%3Amaster)
 
 SpiNNaker Proxy
 ---------------
@@ -67,7 +67,7 @@ simply add the `-t` flag to both the proxy server and client:
 
     # Proxy Server
     spinnaker_proxy.py -s -t SPINN_HOSTNAME
-    
+
     # Proxy Client
     spinnaker_proxy.py -c -t PROXY_HOSTNAME
 
