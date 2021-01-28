@@ -17,8 +17,7 @@
 """
 
 import struct
-from abc import abstractmethod, ABCMeta
-import six
+from abc import abstractmethod, ABCMeta as Abstract
 
 
 class TCPDatagramProtocol(object):
@@ -78,8 +77,7 @@ class TCPDatagramProtocol(object):
         return self.LENGTH.pack(len(datagram)) + datagram
 
 
-@six.add_metaclass(ABCMeta)
-class DatagramProxy(object):
+class DatagramProxy(object, metaclass=Abstract):
     """ A simple proxy server which transparently forwards datagram-based\
         communications."""
 
@@ -93,10 +91,10 @@ class DatagramProxy(object):
             All sockets should be selected for readabillity, and, when\
             readable, func should be called.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     @abstractmethod
     def close(self):
         """ Close all open connections.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
