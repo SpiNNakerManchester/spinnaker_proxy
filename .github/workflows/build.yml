@@ -92,7 +92,6 @@ jobs:
   documentation:
     name: Documentation Check
     runs-on: ubuntu-latest
-    if: false
     steps:
     - name: Set up Python ${{ env.PRIMARY_VERSION }}
       uses: actions/setup-python@v2
@@ -116,7 +115,7 @@ jobs:
     - name: Build documentation with sphinx
       uses: ./support/actions/sphinx
       with:
-        directory: doc/source
+        directory: doc
 
   copyright-check:
     name: Copyright Check
