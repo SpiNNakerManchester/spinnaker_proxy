@@ -27,13 +27,13 @@ DEFAULT_BUFFER_SIZE = 4096
 def udp_socket(bind_port=None, connect_address=None):
     """ How to make a UDP socket.
 
-    :param bind_port: \
+    :param int bind_port:
         If provided, what local port to send and receive packets via.
-    :type bind_port: int
-    :param connect_address: \
-        If provided, what remote IP address/port to send packets to and\
+    :param tuple(str,int) connect_address:
+        If provided, what remote IP address/port to send packets to and
         receive them from.
-    :type connect_address: tuple(str,int)
+    :return: The configured socket.
+    :rtype: ~socket.socket
     """
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     if bind_port is not None:
@@ -46,13 +46,13 @@ def udp_socket(bind_port=None, connect_address=None):
 def tcp_socket(bind_port=None, connect_address=None):
     """ How to make a TCP socket.
 
-    :param bind_port: \
+    :param int bind_port:
         If provided, what local port to send and receive data via.
-    :type bind_port: int
-    :param connect_address: \
-        If provided, what remote IP address/port to send data to and\
+    :param tuple(str,int) connect_address:
+        If provided, what remote IP address/port to send data to and
         receive it from.
-    :type connect_address: tuple(str,int)
+    :return: The configured socket.
+    :rtype: ~socket.socket
     """
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     if bind_port is not None:
@@ -67,10 +67,10 @@ def tcp_socket(bind_port=None, connect_address=None):
 class UDPtoUDP(DatagramProxy):
     """ A UDP to UDP proxy.
 
-    This proxy listens on an "external" UDP port and awaits the arrival of\
-    UDP datagrams. These datagrams are transparently forwarded to the\
-    "internal" UDP address upon arrival. If any UDP datagrams are received\
-    back from the internal connection, these are forwarded to the most recent\
+    This proxy listens on an "external" UDP port and awaits the arrival of
+    UDP datagrams. These datagrams are transparently forwarded to the
+    "internal" UDP address upon arrival. If any UDP datagrams are received
+    back from the internal connection, these are forwarded to the most recent
     external host to send a UDP datagram to the external UDP port.
 
     This proxy essentially allows port numbers to be changed.
@@ -78,11 +78,15 @@ class UDPtoUDP(DatagramProxy):
 
     def __init__(self, ext_udp_port, int_udp_address,
                  bufsize=DEFAULT_BUFFER_SIZE):
+        #: The buffer size (usually 4kB)
         self.bufsize = bufsize
 
+        #: The external socket
         self.ext_sock = udp_socket(bind_port=ext_udp_port)
+        #: The address associated with the external socket
         self.ext_address = None
 
+        #: The internal socket
         self.int_sock = udp_socket(connect_address=int_udp_address)
 
     def ext_to_int(self):
@@ -126,20 +130,27 @@ class UDPtoUDP(DatagramProxy):
 class UDPtoTCP(DatagramProxy):
     """ Forward UDP datagrams over a TCP connection.
 
-    This proxy listens on a UDP port and connects to a TCP server. When a UDP\
-    datagram is received, it is forwarded down the TCP connection. When a\
-    datagram is received from the TCP connection, a UDP datagram is sent to\
+    This proxy listens on a UDP port and connects to a TCP server. When a UDP
+    datagram is received, it is forwarded down the TCP connection. When a
+    datagram is received from the TCP connection, a UDP datagram is sent to
     the last address a UDP datagram was received from.
 
-    Since TCP is stream-based not datagram-based, each datagram is prefixed\
+    Since TCP is stream-based not datagram-based, each datagram is prefixed
     with a 32-bit number indicating the datagram's length in bytes.
 
-    If the TCP connection is closed, this proxy will raise an exception when\
+    If the TCP connection is closed, this proxy will raise an exception when
     it next attempts to forward a datagram.
     """
 
     def __init__(self, udp_port, tcp_address,
                  bufsize=DEFAULT_BUFFER_SIZE):
+        """
+        :param udp_port:
+        :type udp_port: int or None
+        :param str tcp_address:
+        :param int bufsize:
+        """
+        #: The buffer size (usually 4kB)
         self.bufsize = bufsize
 
         self.udp_sock = udp_socket(bind_port=udp_port)
@@ -188,28 +199,35 @@ class UDPtoTCP(DatagramProxy):
 class TCPtoUDP(DatagramProxy):
     """ Unpack datagrams sent over a TCP connection into UDP datagrams.
 
-    This proxy sets up a TCP server and 'connects' to a specified UDP\
-    address. Datagrams sent to the TCP server are forwarded as UDP datagrams\
-    to the specified destination. UDP datagrams received are forwarded down\
+    This proxy sets up a TCP server and 'connects' to a specified UDP
+    address. Datagrams sent to the TCP server are forwarded as UDP datagrams
+    to the specified destination. UDP datagrams received are forwarded down
     the TCP connection.
 
-    Since TCP is stream-based not datagram-based, each datagram is prefixed\
+    Since TCP is stream-based not datagram-based, each datagram is prefixed
     with a 32-bit number indicating the datagram's length in bytes.
 
-    When a connection is made to the TCP server, all previous TCP connections\
+    When a connection is made to the TCP server, all previous TCP connections
     are closed.
     """
 
     def __init__(self, tcp_port, udp_address,
                  bufsize=DEFAULT_BUFFER_SIZE):
+        """
+        :param tcp_port:
+        :type tcp_port: int or None
+        :param str udp_address:
+        :param int bufsize:
+        """
+        #: The buffer size (usually 4kB)
         self.bufsize = bufsize
 
-        # The TCP server
+        #: The TCP server
         self.tcp_listen_sock = tcp_socket(bind_port=tcp_port)
         self.tcp_listen_sock.listen(1)
 
-        # The most recently connected socket to the server (or None if not
-        # connected)
+        #: The most recently connected socket to the server (or None if not
+        #: connected)
         self.tcp_sock = None
 
         self.tcp_protocol = None

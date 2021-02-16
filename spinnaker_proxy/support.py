@@ -23,8 +23,8 @@ from abc import abstractmethod, ABCMeta as Abstract
 class TCPDatagramProtocol(object):
     """ A simple TCP-based protocol for transmitting/receiving datagrams.
 
-    The protocol simply sends datagrams down the TCP connection proceeded by\
-    a 32-bit (network-order) unsigned integer which gives the length of the\
+    The protocol simply sends datagrams down the TCP connection proceeded by
+    a 32-bit (network-order) unsigned integer which gives the length of the
     datagram (in bytes) that follows.
     """
 
@@ -37,15 +37,11 @@ class TCPDatagramProtocol(object):
     def recv(self, tcp_data):
         """ Generate packets in incoming TCP data.
 
-        Parameters
-        ----------
-        tcp_data : bytes
+        :param bytes tcp_data:
             Raw data read from a TCP socket.
-
-        Generates
-        ---------
-        datagram: bytes
+        :return:
             A series of datagrams (possibly none) received from the connection.
+        :rtype: bytes
         """
         # Accumulate received data
         self.buf += tcp_data
@@ -64,15 +60,11 @@ class TCPDatagramProtocol(object):
     def send(self, datagram):
         """ Encode a datagram for transmission down a TCP socket.
 
-        Parameters
-        ----------
-        datagram : bytes
+        :param bytes datagram:
             The datagram to encode.
-
-        Returns
-        ----------
-        bytes
+        :return:
             A series of bytes to send down the TCP socket.
+        :rtype: bytes
         """
         return self.LENGTH.pack(len(datagram)) + datagram
 
@@ -85,11 +77,10 @@ class DatagramProxy(object, metaclass=Abstract):
     def get_select_handlers(self):
         """ List the sockets to select on and their on-readable handlers.
 
-        Returns
-        -------
-        {socket: func, ...}
-            All sockets should be selected for readabillity, and, when\
-            readable, func should be called.
+        :return:
+            All sockets should be selected for readability, and, when
+            readable, that callback should be called.
+        :rtype: dict(~socket.socket, callable)
         """
         raise NotImplementedError
 

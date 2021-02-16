@@ -16,7 +16,7 @@
 name: Build
 on: [push]
 env:
-  PRIMARY_VERSION: 3.6
+  PRIMARY_VERSION: 3.8
 
 jobs:
   python-quality-control:
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8, 3.9]
     steps:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8, 3.9]
     steps:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
