@@ -45,7 +45,8 @@ BOOT_TUNNEL_PORT = 17895
 def run_proxies(datagram_proxies):
     """ Run a given set of proxy servers indefinitely.
 
-    :param iterable(DatagramProxy) datagram_proxies: The proxies to run.
+    :param ~typing.Iterable(DatagramProxy) datagram_proxies:
+        The proxies to run.
     """
     while True:
         # Find out which sockets to select on

@@ -33,7 +33,7 @@ def udp_socket(bind_port=None, connect_address=None):
         If provided, what remote IP address/port to send packets to and
         receive them from.
     :return: The configured socket.
-    :rtype: ~socket.socket
+    :rtype: socket.SocketType
     """
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     if bind_port is not None:
@@ -52,7 +52,7 @@ def tcp_socket(bind_port=None, connect_address=None):
         If provided, what remote IP address/port to send data to and
         receive it from.
     :return: The configured socket.
-    :rtype: ~socket.socket
+    :rtype: socket.SocketType
     """
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     if bind_port is not None:
@@ -153,11 +153,15 @@ class UDPtoTCP(DatagramProxy):
         #: The buffer size (usually 4kB)
         self.bufsize = bufsize
 
+        #: The UDP socket
         self.udp_sock = udp_socket(bind_port=udp_port)
+        #: The address associated with the UDP socket
         self.udp_address = None
 
+        # The TCP (client) socket
         self.tcp_sock = tcp_socket(connect_address=tcp_address)
 
+        #: How to handle messages in the proxy protocol
         self.tcp_protocol = TCPDatagramProtocol()
 
     def udp_to_tcp(self):
@@ -226,11 +230,13 @@ class TCPtoUDP(DatagramProxy):
         self.tcp_listen_sock = tcp_socket(bind_port=tcp_port)
         self.tcp_listen_sock.listen(1)
 
-        #: The most recently connected socket to the server (or None if not
+        #: The most recently connected socket to the server (or ``None`` if not
         #: connected)
         self.tcp_sock = None
 
+        #: How to handle messages in the proxy protocol
         self.tcp_protocol = None
+        #: The UDP socket
         self.udp_sock = udp_socket(connect_address=udp_address)
 
     def on_connect(self):

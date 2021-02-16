@@ -28,7 +28,7 @@ class TCPDatagramProtocol(object):
     datagram (in bytes) that follows.
     """
 
-    LENGTH = struct.Struct("!I")
+    _LENGTH = struct.Struct("!I")
 
     def __init__(self):
         # Buffer to hold incomplete datagrams received over TCP
@@ -41,13 +41,13 @@ class TCPDatagramProtocol(object):
             Raw data read from a TCP socket.
         :return:
             A series of datagrams (possibly none) received from the connection.
-        :rtype: bytes
+        :rtype: ~typing.Iterable(bytes)
         """
         # Accumulate received data
         self.buf += tcp_data
 
         while len(self.buf) >= 4:
-            datagram_length = self.LENGTH.unpack(self.buf[:4])[0]
+            datagram_length = self._LENGTH.unpack(self.buf[:4])[0]
             if len(self.buf) < 4 + datagram_length:
                 break
             # A complete datagram has arrived, yield it
@@ -66,7 +66,7 @@ class TCPDatagramProtocol(object):
             A series of bytes to send down the TCP socket.
         :rtype: bytes
         """
-        return self.LENGTH.pack(len(datagram)) + datagram
+        return self._LENGTH.pack(len(datagram)) + datagram
 
 
 class DatagramProxy(object, metaclass=Abstract):
@@ -80,7 +80,7 @@ class DatagramProxy(object, metaclass=Abstract):
         :return:
             All sockets should be selected for readability, and, when
             readable, that callback should be called.
-        :rtype: dict(~socket.socket, callable)
+        :rtype: dict(socket.SocketType, ~collections.abc.Callable)
         """
         raise NotImplementedError
 
