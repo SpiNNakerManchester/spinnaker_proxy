@@ -63,7 +63,10 @@ def test_tcp_to_udp_proxy():
         with tcp_socket(connect_address=("localhost", 12369)) as s:
             with udp_socket(bind_port=12370) as r:
                 s.send(TCP_FORMAT.pack(4, 0, 1, 2, 3))
-                assert UDP_FORMAT.unpack(r.recv(32)) == (0, 1, 2, 3)
+                m, a = r.recvfrom(32)
+                assert UDP_FORMAT.unpack(m) == (0, 1, 2, 3)
+                r.sendto(UDP_FORMAT.pack(3, 2, 1, 0), a)
+                assert TCP_FORMAT.unpack(s.recv(32)) == (4, 3, 2, 1, 0)
 
 
 def test_udp_to_tcp_proxy():
@@ -75,10 +78,12 @@ def test_udp_to_tcp_proxy():
             with udp_socket(connect_address=("localhost", 12368)) as s:
                 s.send(UDP_FORMAT.pack(0, 2, 4, 6))
                 r, a = tcp_listen_sock.accept()
-                # Ensure that we're not getting sniped from another system
-                assert a[0] == '127.0.0.1'
                 try:
+                    # Ensure that we're not getting sniped from another system
+                    assert a[0] == '127.0.0.1'
                     assert TCP_FORMAT.unpack(r.recv(32)) == (4, 0, 2, 4, 6)
+                    r.send(TCP_FORMAT.pack(4, 6, 4, 2, 0))
+                    assert UDP_FORMAT.unpack(s.recv(32)) == (6, 4, 2, 0)
                 finally:
                     r.close()
 
@@ -89,7 +94,10 @@ def test_udp_to_udp_proxy():
         with udp_socket(connect_address=("localhost", 12370)) as s:
             with udp_socket(bind_port=12371) as r:
                 s.send(UDP_FORMAT.pack(3, 5, 7, 9))
-                assert UDP_FORMAT.unpack(r.recv(32)) == (3, 5, 7, 9)
+                m, a = r.recvfrom(32)
+                assert UDP_FORMAT.unpack(m) == (3, 5, 7, 9)
+                r.sendto(UDP_FORMAT.pack(9, 7, 5, 3), a)
+                assert UDP_FORMAT.unpack(s.recv(32)) == (9, 7, 5, 3)
 
 
 def test_proxy_chain():
@@ -103,4 +111,7 @@ def test_proxy_chain():
                 s.send(UDP_FORMAT.pack(11, 13, 17, 19))
                 assert UDP_FORMAT.unpack(r.recv(32)) == (11, 13, 17, 19)
                 s.send(UDP_FORMAT.pack(23, 27, 29, 31))
-                assert UDP_FORMAT.unpack(r.recv(32)) == (23, 27, 29, 31)
+                m, a = r.recvfrom(32)
+                assert UDP_FORMAT.unpack(m) == (23, 27, 29, 31)
+                r.sendto(b"OK", a)
+                assert s.recv(32) == b'OK'
