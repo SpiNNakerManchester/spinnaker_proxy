@@ -16,10 +16,12 @@
 from functools import partial
 import struct
 import threading
+import pytest
 
 from spinnaker_proxy.proxies import TCPtoUDP, UDPtoTCP, UDPtoUDP
 from spinnaker_proxy.spinnaker_proxy import run_proxies
 from spinnaker_proxy.support import tcp_socket, udp_socket
+# pylint: disable=redefined-outer-name
 
 # We're using 4 byte messages to test with
 TCP_FORMAT = struct.Struct("!Ibbbb")
@@ -57,6 +59,24 @@ class Runner:
         return False
 
 
+@pytest.fixture
+def tcp_connected():
+    # Hard-coded port!
+    with tcp_socket(bind_port=12369) as listener:
+        def accept():
+            r, a = listener.accept()
+            try:
+                # Ensure that we're not getting sniped from another system
+                assert a[0] == '127.0.0.1'
+            except:
+                r.close()
+                raise
+            return r
+
+        listener.listen(1)
+        yield accept
+
+
 def test_tcp_to_udp_proxy():
     proxy = TCPtoUDP(12369, ("localhost", 12370))
     with Runner(partial(run_proxies, [proxy])):
@@ -69,23 +89,16 @@ def test_tcp_to_udp_proxy():
                 assert TCP_FORMAT.unpack(s.recv(32)) == (4, 3, 2, 1, 0)
 
 
-def test_udp_to_tcp_proxy():
-    with tcp_socket(bind_port=12369) as tcp_listen_sock:
-        tcp_listen_sock.listen(1)
-
-        proxy = UDPtoTCP(12368, ("localhost", 12369))
-        with Runner(partial(run_proxies, [proxy])):
-            with udp_socket(connect_address=("localhost", 12368)) as s:
-                s.send(UDP_FORMAT.pack(0, 2, 4, 6))
-                r, a = tcp_listen_sock.accept()
-                try:
-                    # Ensure that we're not getting sniped from another system
-                    assert a[0] == '127.0.0.1'
-                    assert TCP_FORMAT.unpack(r.recv(32)) == (4, 0, 2, 4, 6)
-                    r.send(TCP_FORMAT.pack(4, 6, 4, 2, 0))
-                    assert UDP_FORMAT.unpack(s.recv(32)) == (6, 4, 2, 0)
-                finally:
-                    r.close()
+def test_udp_to_tcp_proxy(tcp_connected):
+    proxy = UDPtoTCP(12368, ("localhost", 12369))
+    with Runner(partial(run_proxies, [proxy])):
+        with udp_socket(connect_address=("localhost", 12368)) as s:
+            s.send(UDP_FORMAT.pack(0, 2, 4, 6))
+            # NB: connection not formed until first UDP packet received
+            with tcp_connected() as r:
+                assert TCP_FORMAT.unpack(r.recv(32)) == (4, 0, 2, 4, 6)
+                r.send(TCP_FORMAT.pack(4, 6, 4, 2, 0))
+                assert UDP_FORMAT.unpack(s.recv(32)) == (6, 4, 2, 0)
 
 
 def test_udp_to_udp_proxy():
@@ -113,5 +126,6 @@ def test_proxy_chain():
                 s.send(UDP_FORMAT.pack(23, 27, 29, 31))
                 m, a = r.recvfrom(32)
                 assert UDP_FORMAT.unpack(m) == (23, 27, 29, 31)
+                # Check that we can sling a non-4-byte message too
                 r.sendto(b"OK", a)
                 assert s.recv(32) == b'OK'
