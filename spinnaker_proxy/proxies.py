@@ -12,64 +12,14 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 """ The implementations of the proxy classes.
 """
 
 import logging
-import socket
 
-from .support import DatagramProxy, TCPDatagramProtocol
+from .support import DatagramProxy, TCPDatagramProtocol, tcp_socket, udp_socket
 
 DEFAULT_BUFFER_SIZE = 4096
-
-
-def udp_socket(bind_port=None, connect_address=None):
-    """ How to make a UDP socket.
-
-    :param int bind_port:
-        If provided, what local port to send and receive packets via.
-    :param tuple(str,int) connect_address:
-        If provided, what remote IP address/port to send packets to and
-        receive them from.
-    :return: The configured socket.
-    :rtype: socket.SocketType
-    """
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        if bind_port is not None:
-            sock.bind(("", bind_port))
-        if connect_address is not None:
-            sock.connect(connect_address)
-    except Exception as e:
-        sock.close()
-        raise e
-    return sock
-
-
-def tcp_socket(bind_port=None, connect_address=None):
-    """ How to make a TCP socket.
-
-    :param int bind_port:
-        If provided, what local port to send and receive data via.
-    :param tuple(str,int) connect_address:
-        If provided, what remote IP address/port to send data to and
-        receive it from.
-    :return: The configured socket.
-    :rtype: socket.SocketType
-    """
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        if bind_port is not None:
-            sock.setsockopt(
-                socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            sock.bind(("", bind_port))
-        if connect_address is not None:
-            sock.connect(connect_address)
-    except Exception as e:
-        sock.close()
-        raise e
-    return sock
 
 
 class UDPtoUDP(DatagramProxy):

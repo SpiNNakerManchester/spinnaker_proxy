@@ -17,9 +17,9 @@ from functools import partial
 import struct
 import threading
 
-from spinnaker_proxy.proxies import (
-    TCPtoUDP, UDPtoTCP, UDPtoUDP, tcp_socket, udp_socket)
+from spinnaker_proxy.proxies import TCPtoUDP, UDPtoTCP, UDPtoUDP
 from spinnaker_proxy.spinnaker_proxy import run_proxies
+from spinnaker_proxy.support import tcp_socket, udp_socket
 
 # We're using 4 byte messages to test with
 TCP_FORMAT = struct.Struct("!Ibbbb")
