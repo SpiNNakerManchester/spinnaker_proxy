@@ -68,7 +68,7 @@ def tcp_connected():
             try:
                 # Ensure that we're not getting sniped from another system
                 assert a[0] == '127.0.0.1'
-            except:
+            except AssertionError:
                 r.close()
                 raise
             return r
