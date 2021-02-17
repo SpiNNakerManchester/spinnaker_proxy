@@ -1,5 +1,5 @@
 [![Build Status](https://github.com/SpiNNakerManchester/spinnaker_proxy/workflows/Build/badge.svg?branch=master)](https://github.com/SpiNNakerManchester/spinnaker_proxy/actions?query=workflow%3A%22Build%22+branch%3Amaster)
-[![Coverage Status](https://coveralls.io/repos/github/SpiNNakerManchester/spinnaker_proxy/badge.svg?branch=test-3.9)](https://coveralls.io/github/SpiNNakerManchester/spinnaker_proxy?branch=test-3.9)
+[![Coverage Status](https://coveralls.io/repos/github/SpiNNakerManchester/spinnaker_proxy/badge.svg?branch=master)](https://coveralls.io/github/SpiNNakerManchester/spinnaker_proxy?branch=master)
 
 SpiNNaker Proxy
 ===============
@@ -30,6 +30,9 @@ By transmitting boot packets using a different port number between the proxy
 client and server, the packets are not stripped out by most ISPs. Further, the
 proxy can use TCP to send boot packets between the client and server to ensure
 no packets are dropped while crossing the Internet.
+
+[Further documentation](http://spinnakermanchester.github.io/spinnaker_proxy/)
+(internal API docs) is available.
 
 Installation
 ------------
