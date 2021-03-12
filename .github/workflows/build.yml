@@ -16,7 +16,7 @@
 name: Build
 on: [push]
 env:
-  PRIMARY_VERSION: 3.6
+  PRIMARY_VERSION: 3.8
 
 jobs:
   python-quality-control:
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8, 3.9]
     steps:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -47,7 +47,7 @@ jobs:
         pip install -r requirements-test.txt
 
     - name: Lint with flake8
-      run: flake8 spinnaker_proxy
+      run: flake8 spinnaker_proxy unittests
     - name: Lint with pylint
       uses: ./support/actions/pylint
       with: 
@@ -55,11 +55,10 @@ jobs:
 
   python-test:
     name: Python Test
-    if: false
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8, 3.9]
     steps:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -87,12 +86,11 @@ jobs:
         tests: unittests
         coverage: ${{ matrix.python-version == env.PRIMARY_VERSION }}
         cover-packages: spinnaker_proxy
-        coveralls-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        coveralls-token: ${{ secrets.GITHUB_TOKEN }}
 
   documentation:
     name: Documentation Check
     runs-on: ubuntu-latest
-    if: false
     steps:
     - name: Set up Python ${{ env.PRIMARY_VERSION }}
       uses: actions/setup-python@v2
@@ -116,7 +114,7 @@ jobs:
     - name: Build documentation with sphinx
       uses: ./support/actions/sphinx
       with:
-        directory: doc/source
+        directory: doc
 
   copyright-check:
     name: Copyright Check

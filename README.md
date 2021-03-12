@@ -1,7 +1,8 @@
 [![Build Status](https://github.com/SpiNNakerManchester/spinnaker_proxy/workflows/Build/badge.svg?branch=master)](https://github.com/SpiNNakerManchester/spinnaker_proxy/actions?query=workflow%3A%22Build%22+branch%3Amaster)
+[![Coverage Status](https://coveralls.io/repos/github/SpiNNakerManchester/spinnaker_proxy/badge.svg?branch=master)](https://coveralls.io/github/SpiNNakerManchester/spinnaker_proxy?branch=master)
 
 SpiNNaker Proxy
----------------
+===============
 
 A small proxy utility which allows reliable basic operation of SpiNNaker boards
 over the open Internet.
@@ -29,6 +30,9 @@ By transmitting boot packets using a different port number between the proxy
 client and server, the packets are not stripped out by most ISPs. Further, the
 proxy can use TCP to send boot packets between the client and server to ensure
 no packets are dropped while crossing the Internet.
+
+[Further documentation](http://spinnakermanchester.github.io/spinnaker_proxy/)
+(internal API docs) is available.
 
 Installation
 ------------
@@ -77,17 +81,17 @@ Default Ports
 
 By default the following ports are used between the proxy server and client.
 
-Port  | Description
------ | ------------
-17894 | SCP packets
-17895 | Boot packets
+| Port  | Description  |
+| ----- | ------------ |
+| 17894 | SCP packets  |
+| 17895 | Boot packets |
 
 These can be changed using command line options which can be listed using
 `spinnaker_proxy.py --help`.
 
 
 Warnings
---------
+========
 
 The proxy will only forward SCP and boot commands. To send/receive SDP packets
 to/from a machine you should communicate directly with the machine, bypassing

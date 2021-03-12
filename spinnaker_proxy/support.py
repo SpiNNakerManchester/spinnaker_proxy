@@ -13,22 +13,71 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-""" Simple support classes.
+""" Simple support classes and function.
 """
 
-import struct
 from abc import abstractmethod, ABCMeta as Abstract
+import socket
+import struct
+
+
+def udp_socket(bind_port=None, connect_address=None):
+    """ How to make a UDP socket.
+
+    :param int bind_port:
+        If provided, what local port to send and receive packets via.
+    :param tuple(str,int) connect_address:
+        If provided, what remote IP address/port to send packets to and
+        receive them from.
+    :return: The configured socket.
+    :rtype: socket.SocketType
+    """
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        if bind_port is not None:
+            sock.bind(("", bind_port))
+        if connect_address is not None:
+            sock.connect(connect_address)
+    except Exception as e:
+        sock.close()
+        raise e
+    return sock
+
+
+def tcp_socket(bind_port=None, connect_address=None):
+    """ How to make a TCP socket.
+
+    :param int bind_port:
+        If provided, what local port to send and receive data via.
+    :param tuple(str,int) connect_address:
+        If provided, what remote IP address/port to send data to and
+        receive it from.
+    :return: The configured socket.
+    :rtype: socket.SocketType
+    """
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        if bind_port is not None:
+            sock.setsockopt(
+                socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.bind(("", bind_port))
+        if connect_address is not None:
+            sock.connect(connect_address)
+    except Exception as e:
+        sock.close()
+        raise e
+    return sock
 
 
 class TCPDatagramProtocol(object):
     """ A simple TCP-based protocol for transmitting/receiving datagrams.
 
-    The protocol simply sends datagrams down the TCP connection proceeded by\
-    a 32-bit (network-order) unsigned integer which gives the length of the\
+    The protocol simply sends datagrams down the TCP connection proceeded by
+    a 32-bit (network-order) unsigned integer which gives the length of the
     datagram (in bytes) that follows.
     """
 
-    LENGTH = struct.Struct("!I")
+    _LENGTH = struct.Struct("!I")
 
     def __init__(self):
         # Buffer to hold incomplete datagrams received over TCP
@@ -37,21 +86,17 @@ class TCPDatagramProtocol(object):
     def recv(self, tcp_data):
         """ Generate packets in incoming TCP data.
 
-        Parameters
-        ----------
-        tcp_data : bytes
+        :param bytes tcp_data:
             Raw data read from a TCP socket.
-
-        Generates
-        ---------
-        datagram: bytes
+        :return:
             A series of datagrams (possibly none) received from the connection.
+        :rtype: ~typing.Iterable(bytes)
         """
         # Accumulate received data
         self.buf += tcp_data
 
         while len(self.buf) >= 4:
-            datagram_length = self.LENGTH.unpack(self.buf[:4])[0]
+            datagram_length = self._LENGTH.unpack(self.buf[:4])[0]
             if len(self.buf) < 4 + datagram_length:
                 break
             # A complete datagram has arrived, yield it
@@ -64,17 +109,13 @@ class TCPDatagramProtocol(object):
     def send(self, datagram):
         """ Encode a datagram for transmission down a TCP socket.
 
-        Parameters
-        ----------
-        datagram : bytes
+        :param bytes datagram:
             The datagram to encode.
-
-        Returns
-        ----------
-        bytes
+        :return:
             A series of bytes to send down the TCP socket.
+        :rtype: bytes
         """
-        return self.LENGTH.pack(len(datagram)) + datagram
+        return self._LENGTH.pack(len(datagram)) + datagram
 
 
 class DatagramProxy(object, metaclass=Abstract):
@@ -83,13 +124,13 @@ class DatagramProxy(object, metaclass=Abstract):
 
     @abstractmethod
     def get_select_handlers(self):
-        """ List the sockets to select on and their on-readable handlers.
+        """ List the file descriptors of sockets to select on and their\
+            on-readable handlers.
 
-        Returns
-        -------
-        {socket: func, ...}
-            All sockets should be selected for readabillity, and, when\
-            readable, func should be called.
+        :return:
+            All sockets should be selected for readability, and, when
+            readable, that callback should be called.
+        :rtype: dict(socket.SocketType, ~collections.abc.Callable)
         """
         raise NotImplementedError
 

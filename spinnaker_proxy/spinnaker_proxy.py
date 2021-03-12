@@ -20,7 +20,8 @@
 
 import argparse
 import logging
-from select import select
+import select
+import threading
 
 from .proxies import TCPtoUDP, UDPtoTCP, UDPtoUDP
 
@@ -42,23 +43,40 @@ BOOT_TUNNEL_PORT = 17895
 """
 
 
-def run_proxies(datagram_proxies):
-    """ Run a given set of proxy servers indefinitely.
+def run_proxies(datagram_proxies, event=None):
+    """ Run a given set of proxy servers.
 
-    :type datagram_proxies: iterable(:py:class:`DatagramProxy`)
+    :param ~typing.Iterable(DatagramProxy) datagram_proxies:
+        The proxies to run.
+    :param event: A way to ask the event processing loop to shut down.
+        Set the event and things will stop within a second.
+        If not provided, will loop indefinitely.
+    :type event: ~threading.Event or None
     """
-    while True:
-        # Find out which sockets to select on
-        select_handlers = {}
+    if not event:
+        event = threading.Event()
+        event.clear()
+    try:
+        while not event.is_set():
+            # Find out which sockets to select on
+            select_handlers = {}
+            for p in datagram_proxies:
+                select_handlers.update(p.get_select_handlers())
+            fds = list(s for s in select_handlers if s and s.fileno() >= 0)
+
+            # Nothing to do, so stop
+            if not fds:
+                break
+
+            # Wait for data to arrive on any socket
+            readers, _writers, errs = select.select(fds, [], fds, 0.5)
+
+            # Handle the data
+            for sock in set(readers + errs):
+                select_handlers[sock]()
+    finally:
         for p in datagram_proxies:
-            select_handlers.update(p.get_select_handlers())
-
-        # Wait for data to arrive on any socket
-        readers, _writers, _errs = select(list(select_handlers), [], [])
-
-        # Handle the data
-        for sock in readers:
-            select_handlers[sock]()
+            p.close()
 
 
 def _main_program():
@@ -123,11 +141,7 @@ def _main_program():
         datagram_proxies.append(
             boot_proxy(args.boot_port, (args.target, args.boot_tunnel_port)))
 
-    try:
-        run_proxies(datagram_proxies)
-    finally:
-        for p in datagram_proxies:
-            p.close()
+    run_proxies(datagram_proxies)
 
 
 if __name__ == "__main__":
