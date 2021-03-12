@@ -118,6 +118,21 @@ def _parse_arguments(args=None):
     return parser.parse_args(args=args)
 
 
+def _construct_proxies(args):
+    if args.server:
+        sdp_proxy = TCPtoUDP if args.sdp_via_tcp else UDPtoUDP
+        yield sdp_proxy(args.scp_tunnel_port, (args.target, args.scp_port))
+
+        boot_proxy = TCPtoUDP if args.boot_via_tcp else UDPtoUDP
+        yield boot_proxy(args.boot_tunnel_port, (args.target, args.boot_port))
+    elif args.client:
+        sdp_proxy = UDPtoTCP if args.sdp_via_tcp else UDPtoUDP
+        yield sdp_proxy(args.scp_port, (args.target, args.scp_tunnel_port))
+
+        boot_proxy = UDPtoTCP if args.boot_via_tcp else UDPtoUDP
+        yield boot_proxy(args.boot_port, (args.target, args.boot_tunnel_port))
+
+
 def _main_program():
     """ The main program. Assumes that it is only ever called from this file.
     """
@@ -126,24 +141,7 @@ def _main_program():
     if not args.quiet:
         logging.basicConfig(level=logging.INFO)
 
-    datagram_proxies = []
-
-    if args.server:
-        sdp_proxy = TCPtoUDP if args.sdp_via_tcp else UDPtoUDP
-        datagram_proxies.append(
-            sdp_proxy(args.scp_tunnel_port, (args.target, args.scp_port)))
-
-        boot_proxy = TCPtoUDP if args.boot_via_tcp else UDPtoUDP
-        datagram_proxies.append(
-            boot_proxy(args.boot_tunnel_port, (args.target, args.boot_port)))
-    elif args.client:
-        sdp_proxy = UDPtoTCP if args.sdp_via_tcp else UDPtoUDP
-        datagram_proxies.append(
-            sdp_proxy(args.scp_port, (args.target, args.scp_tunnel_port)))
-
-        boot_proxy = UDPtoTCP if args.boot_via_tcp else UDPtoUDP
-        datagram_proxies.append(
-            boot_proxy(args.boot_port, (args.target, args.boot_tunnel_port)))
+    datagram_proxies = list(_construct_proxies(args))
 
     run_proxies(datagram_proxies)
 

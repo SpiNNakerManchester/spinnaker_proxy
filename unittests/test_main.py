@@ -15,7 +15,9 @@
 
 import pytest
 import spinnaker_proxy.spinnaker_proxy as main
-# pylint: disable=protected-access
+import spinnaker_proxy.support as support
+# pylint: disable=protected-access, attribute-defined-outside-init
+# pylint: disable=redefined-outer-name, unused-argument
 
 
 def test_argument_parsing():
@@ -77,3 +79,41 @@ def test_argument_errors(capsys):
         main._parse_arguments(["-h"])
     captured = capsys.readouterr()
     assert "usage:" in captured.out
+
+
+@pytest.fixture
+def do_not_connect():
+    """
+    Disables doing the TCP connection step; we don't want to have to care about
+    configuring dummy servers to receive connections here.
+    """
+    value = support._SKIP_TCP_CONNECT
+    support._SKIP_TCP_CONNECT = True
+    yield None
+    support._SKIP_TCP_CONNECT = value
+
+
+class MockArgs():
+    """ A mock of the arguments out of arg parsing
+    """
+    def __init__(self, client, sdp, boot):
+        self.client = client
+        self.server = not client
+        self.target = "localhost"
+        self.sdp_via_tcp = sdp
+        self.boot_via_tcp = boot
+        self.scp_port = 13530
+        self.boot_port = 13531
+        self.scp_tunnel_port = 13532
+        self.boot_tunnel_port = 13533
+
+
+@pytest.mark.parametrize("client", [True, False])
+@pytest.mark.parametrize("sdp", [True, False])
+@pytest.mark.parametrize("boot", [True, False])
+def test_proxy_construction(client, sdp, boot, do_not_connect):
+    proxies = list(main._construct_proxies(MockArgs(client, sdp, boot)))
+    assert len(proxies) == 2
+    for p in proxies:
+        assert isinstance(p, support.DatagramProxy)
+        p.close()

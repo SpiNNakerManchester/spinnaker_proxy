@@ -20,6 +20,9 @@ from abc import abstractmethod, ABCMeta as Abstract
 import socket
 import struct
 
+#: Whether to skip doing a TCP connect, for testing only
+_SKIP_TCP_CONNECT = False
+
 
 def udp_socket(bind_port=None, connect_address=None):
     """ How to make a UDP socket.
@@ -61,7 +64,7 @@ def tcp_socket(bind_port=None, connect_address=None):
             sock.setsockopt(
                 socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.bind(("", bind_port))
-        if connect_address is not None:
+        if connect_address is not None and not _SKIP_TCP_CONNECT:
             sock.connect(connect_address)
     except Exception as e:
         sock.close()
