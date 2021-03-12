@@ -17,6 +17,6 @@
 pylint <2.5
 coverage >=4.4, <5.0
 pytest-cov
-python-coveralls
+coveralls
 flake8
 sphinx >= 2
