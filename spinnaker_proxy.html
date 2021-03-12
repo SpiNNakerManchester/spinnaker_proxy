@@ -1,0 +1,523 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>spinnaker_proxy package &#8212; SpiNNaker Network Proxy  documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="spinnaker_proxy" href="modules.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="spinnaker_proxy"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SpiNNaker Network Proxy  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" accesskey="U">spinnaker_proxy</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">spinnaker_proxy package</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="spinnaker-proxy-package">
+<h1>spinnaker_proxy package<a class="headerlink" href="#spinnaker-proxy-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-spinnaker_proxy.proxies">
+<span id="spinnaker-proxy-proxies-module"></span><h2>spinnaker_proxy.proxies module<a class="headerlink" href="#module-spinnaker_proxy.proxies" title="Permalink to this headline">¶</a></h2>
+<p>The implementations of the proxy classes.</p>
+<dl class="py class">
+<dt id="spinnaker_proxy.proxies.TCPtoUDP">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">spinnaker_proxy.proxies.</span></code><code class="sig-name descname"><span class="pre">TCPtoUDP</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tcp_port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">udp_address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bufsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4096</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.proxies.TCPtoUDP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#spinnaker_proxy.support.DatagramProxy" title="spinnaker_proxy.support.DatagramProxy"><code class="xref py py-class docutils literal notranslate"><span class="pre">spinnaker_proxy.support.DatagramProxy</span></code></a></p>
+<p>Unpack datagrams sent over a TCP connection into UDP datagrams.</p>
+<p>This proxy sets up a TCP server and ‘connects’ to a specified UDP
+address. Datagrams sent to the TCP server are forwarded as UDP datagrams
+to the specified destination. UDP datagrams received are forwarded down
+the TCP connection.</p>
+<p>Since TCP is stream-based not datagram-based, each datagram is prefixed
+with a 32-bit number indicating the datagram’s length in bytes.</p>
+<p>When a connection is made to the TCP server, all previous TCP connections
+are closed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tcp_port</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3.8/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – </p></li>
+<li><p><strong>udp_address</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – </p></li>
+<li><p><strong>bufsize</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="spinnaker_proxy.proxies.TCPtoUDP.bufsize">
+<code class="sig-name descname"><span class="pre">bufsize</span></code><a class="headerlink" href="#spinnaker_proxy.proxies.TCPtoUDP.bufsize" title="Permalink to this definition">¶</a></dt>
+<dd><p>The buffer size (usually 4kB)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="spinnaker_proxy.proxies.TCPtoUDP.close">
+<code class="sig-name descname"><span class="pre">close</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.proxies.TCPtoUDP.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close all open connections.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="spinnaker_proxy.proxies.TCPtoUDP.get_select_handlers">
+<code class="sig-name descname"><span class="pre">get_select_handlers</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.proxies.TCPtoUDP.get_select_handlers" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the file descriptors of sockets to select on and their            on-readable handlers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>All sockets should be selected for readability, and, when
+readable, that callback should be called.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>(socket.SocketType, <a class="reference external" href="https://docs.python.org/3.8/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.8)">Callable</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="spinnaker_proxy.proxies.TCPtoUDP.on_connect">
+<code class="sig-name descname"><span class="pre">on_connect</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.proxies.TCPtoUDP.on_connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback to handle new TCP connections.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="spinnaker_proxy.proxies.TCPtoUDP.tcp_listen_sock">
+<code class="sig-name descname"><span class="pre">tcp_listen_sock</span></code><a class="headerlink" href="#spinnaker_proxy.proxies.TCPtoUDP.tcp_listen_sock" title="Permalink to this definition">¶</a></dt>
+<dd><p>The TCP server</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="spinnaker_proxy.proxies.TCPtoUDP.tcp_protocol">
+<code class="sig-name descname"><span class="pre">tcp_protocol</span></code><a class="headerlink" href="#spinnaker_proxy.proxies.TCPtoUDP.tcp_protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>How to handle messages in the proxy protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="spinnaker_proxy.proxies.TCPtoUDP.tcp_sock">
+<code class="sig-name descname"><span class="pre">tcp_sock</span></code><a class="headerlink" href="#spinnaker_proxy.proxies.TCPtoUDP.tcp_sock" title="Permalink to this definition">¶</a></dt>
+<dd><p>The most recently connected socket to the server (or <code class="docutils literal notranslate"><span class="pre">None</span></code> if not
+connected)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="spinnaker_proxy.proxies.TCPtoUDP.tcp_to_udp">
+<code class="sig-name descname"><span class="pre">tcp_to_udp</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.proxies.TCPtoUDP.tcp_to_udp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unpack received TCP data and forward any datagrams over UDP.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="spinnaker_proxy.proxies.TCPtoUDP.udp_to_tcp">
+<code class="sig-name descname"><span class="pre">udp_to_tcp</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.proxies.TCPtoUDP.udp_to_tcp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward received UDP datagrams over TCP.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="spinnaker_proxy.proxies.UDPtoTCP">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">spinnaker_proxy.proxies.</span></code><code class="sig-name descname"><span class="pre">UDPtoTCP</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">udp_port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tcp_address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bufsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4096</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoTCP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#spinnaker_proxy.support.DatagramProxy" title="spinnaker_proxy.support.DatagramProxy"><code class="xref py py-class docutils literal notranslate"><span class="pre">spinnaker_proxy.support.DatagramProxy</span></code></a></p>
+<p>Forward UDP datagrams over a TCP connection.</p>
+<p>This proxy listens on a UDP port and connects to a TCP server. When a UDP
+datagram is received, it is forwarded down the TCP connection. When a
+datagram is received from the TCP connection, a UDP datagram is sent to
+the last address a UDP datagram was received from.</p>
+<p>Since TCP is stream-based not datagram-based, each datagram is prefixed
+with a 32-bit number indicating the datagram’s length in bytes.</p>
+<p>If the TCP connection is closed, this proxy will raise an exception when
+it next attempts to forward a datagram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>udp_port</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3.8/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – </p></li>
+<li><p><strong>tcp_address</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – </p></li>
+<li><p><strong>bufsize</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="spinnaker_proxy.proxies.UDPtoTCP.bufsize">
+<code class="sig-name descname"><span class="pre">bufsize</span></code><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoTCP.bufsize" title="Permalink to this definition">¶</a></dt>
+<dd><p>The buffer size (usually 4kB)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="spinnaker_proxy.proxies.UDPtoTCP.close">
+<code class="sig-name descname"><span class="pre">close</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoTCP.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close all open connections.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="spinnaker_proxy.proxies.UDPtoTCP.get_select_handlers">
+<code class="sig-name descname"><span class="pre">get_select_handlers</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoTCP.get_select_handlers" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the file descriptors of sockets to select on and their            on-readable handlers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>All sockets should be selected for readability, and, when
+readable, that callback should be called.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>(socket.SocketType, <a class="reference external" href="https://docs.python.org/3.8/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.8)">Callable</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="spinnaker_proxy.proxies.UDPtoTCP.tcp_protocol">
+<code class="sig-name descname"><span class="pre">tcp_protocol</span></code><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoTCP.tcp_protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>How to handle messages in the proxy protocol</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="spinnaker_proxy.proxies.UDPtoTCP.tcp_to_udp">
+<code class="sig-name descname"><span class="pre">tcp_to_udp</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoTCP.tcp_to_udp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unpack received TCP data and forward any datagrams over UDP.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="spinnaker_proxy.proxies.UDPtoTCP.udp_address">
+<code class="sig-name descname"><span class="pre">udp_address</span></code><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoTCP.udp_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>The address associated with the UDP socket</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="spinnaker_proxy.proxies.UDPtoTCP.udp_sock">
+<code class="sig-name descname"><span class="pre">udp_sock</span></code><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoTCP.udp_sock" title="Permalink to this definition">¶</a></dt>
+<dd><p>The UDP socket</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="spinnaker_proxy.proxies.UDPtoTCP.udp_to_tcp">
+<code class="sig-name descname"><span class="pre">udp_to_tcp</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoTCP.udp_to_tcp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward received UDP datagrams over TCP.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="spinnaker_proxy.proxies.UDPtoUDP">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">spinnaker_proxy.proxies.</span></code><code class="sig-name descname"><span class="pre">UDPtoUDP</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ext_udp_port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_udp_address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bufsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4096</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoUDP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#spinnaker_proxy.support.DatagramProxy" title="spinnaker_proxy.support.DatagramProxy"><code class="xref py py-class docutils literal notranslate"><span class="pre">spinnaker_proxy.support.DatagramProxy</span></code></a></p>
+<p>A UDP to UDP proxy.</p>
+<p>This proxy listens on an “external” UDP port and awaits the arrival of
+UDP datagrams. These datagrams are transparently forwarded to the
+“internal” UDP address upon arrival. If any UDP datagrams are received
+back from the internal connection, these are forwarded to the most recent
+external host to send a UDP datagram to the external UDP port.</p>
+<p>This proxy essentially allows port numbers to be changed.</p>
+<dl class="py attribute">
+<dt id="spinnaker_proxy.proxies.UDPtoUDP.bufsize">
+<code class="sig-name descname"><span class="pre">bufsize</span></code><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoUDP.bufsize" title="Permalink to this definition">¶</a></dt>
+<dd><p>The buffer size (usually 4kB)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="spinnaker_proxy.proxies.UDPtoUDP.close">
+<code class="sig-name descname"><span class="pre">close</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoUDP.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close all open connections.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="spinnaker_proxy.proxies.UDPtoUDP.ext_address">
+<code class="sig-name descname"><span class="pre">ext_address</span></code><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoUDP.ext_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>The address associated with the external socket</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="spinnaker_proxy.proxies.UDPtoUDP.ext_sock">
+<code class="sig-name descname"><span class="pre">ext_sock</span></code><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoUDP.ext_sock" title="Permalink to this definition">¶</a></dt>
+<dd><p>The external socket</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="spinnaker_proxy.proxies.UDPtoUDP.ext_to_int">
+<code class="sig-name descname"><span class="pre">ext_to_int</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoUDP.ext_to_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward a UDP datagram arriving from the external socket to the            internal socket.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="spinnaker_proxy.proxies.UDPtoUDP.get_select_handlers">
+<code class="sig-name descname"><span class="pre">get_select_handlers</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoUDP.get_select_handlers" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the file descriptors of sockets to select on and their            on-readable handlers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>All sockets should be selected for readability, and, when
+readable, that callback should be called.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>(socket.SocketType, <a class="reference external" href="https://docs.python.org/3.8/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.8)">Callable</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="spinnaker_proxy.proxies.UDPtoUDP.int_sock">
+<code class="sig-name descname"><span class="pre">int_sock</span></code><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoUDP.int_sock" title="Permalink to this definition">¶</a></dt>
+<dd><p>The internal socket</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="spinnaker_proxy.proxies.UDPtoUDP.int_to_ext">
+<code class="sig-name descname"><span class="pre">int_to_ext</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.proxies.UDPtoUDP.int_to_ext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward a UDP datagram arriving from the internal socket to the            external socket.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-spinnaker_proxy.spinnaker_proxy">
+<span id="spinnaker-proxy-spinnaker-proxy-module"></span><h2>spinnaker_proxy.spinnaker_proxy module<a class="headerlink" href="#module-spinnaker_proxy.spinnaker_proxy" title="Permalink to this headline">¶</a></h2>
+<p>A proxy for SpiNNaker boards.</p>
+<dl class="py data">
+<dt id="spinnaker_proxy.spinnaker_proxy.BOOT_PORT">
+<code class="sig-prename descclassname"><span class="pre">spinnaker_proxy.spinnaker_proxy.</span></code><code class="sig-name descname"><span class="pre">BOOT_PORT</span></code><em class="property"> <span class="pre">=</span> <span class="pre">54321</span></em><a class="headerlink" href="#spinnaker_proxy.spinnaker_proxy.BOOT_PORT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Port used to boot a SpiNNaker machine.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="spinnaker_proxy.spinnaker_proxy.BOOT_TUNNEL_PORT">
+<code class="sig-prename descclassname"><span class="pre">spinnaker_proxy.spinnaker_proxy.</span></code><code class="sig-name descname"><span class="pre">BOOT_TUNNEL_PORT</span></code><em class="property"> <span class="pre">=</span> <span class="pre">17895</span></em><a class="headerlink" href="#spinnaker_proxy.spinnaker_proxy.BOOT_TUNNEL_PORT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Port used for tunnelling boot packets.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="spinnaker_proxy.spinnaker_proxy.SCP_PORT">
+<code class="sig-prename descclassname"><span class="pre">spinnaker_proxy.spinnaker_proxy.</span></code><code class="sig-name descname"><span class="pre">SCP_PORT</span></code><em class="property"> <span class="pre">=</span> <span class="pre">17893</span></em><a class="headerlink" href="#spinnaker_proxy.spinnaker_proxy.SCP_PORT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Port used for SCP communications.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="spinnaker_proxy.spinnaker_proxy.SCP_TUNNEL_PORT">
+<code class="sig-prename descclassname"><span class="pre">spinnaker_proxy.spinnaker_proxy.</span></code><code class="sig-name descname"><span class="pre">SCP_TUNNEL_PORT</span></code><em class="property"> <span class="pre">=</span> <span class="pre">17894</span></em><a class="headerlink" href="#spinnaker_proxy.spinnaker_proxy.SCP_TUNNEL_PORT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Port used for tunnelling SCP communications.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="spinnaker_proxy.spinnaker_proxy.run_proxies">
+<code class="sig-prename descclassname"><span class="pre">spinnaker_proxy.spinnaker_proxy.</span></code><code class="sig-name descname"><span class="pre">run_proxies</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datagram_proxies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.spinnaker_proxy.run_proxies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a given set of proxy servers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datagram_proxies</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/typing.html#typing.Iterable" title="(in Python v3.8)"><em>Iterable</em></a><em>(</em><a class="reference internal" href="#spinnaker_proxy.support.DatagramProxy" title="spinnaker_proxy.support.DatagramProxy"><em>DatagramProxy</em></a><em>)</em>) – The proxies to run.</p></li>
+<li><p><strong>event</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/threading.html#threading.Event" title="(in Python v3.8)"><em>Event</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3.8/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – A way to ask the event processing loop to shut down.
+Set the event and things will stop within a second.
+If not provided, will loop indefinitely.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-spinnaker_proxy.support">
+<span id="spinnaker-proxy-support-module"></span><h2>spinnaker_proxy.support module<a class="headerlink" href="#module-spinnaker_proxy.support" title="Permalink to this headline">¶</a></h2>
+<p>Simple support classes and function.</p>
+<dl class="py class">
+<dt id="spinnaker_proxy.support.DatagramProxy">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">spinnaker_proxy.support.</span></code><code class="sig-name descname"><span class="pre">DatagramProxy</span></code><a class="headerlink" href="#spinnaker_proxy.support.DatagramProxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.8/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A simple proxy server which transparently forwards datagram-based        communications.</p>
+<dl class="py method">
+<dt id="spinnaker_proxy.support.DatagramProxy.close">
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">close</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.support.DatagramProxy.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close all open connections.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="spinnaker_proxy.support.DatagramProxy.get_select_handlers">
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">get_select_handlers</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.support.DatagramProxy.get_select_handlers" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the file descriptors of sockets to select on and their            on-readable handlers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>All sockets should be selected for readability, and, when
+readable, that callback should be called.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>(socket.SocketType, <a class="reference external" href="https://docs.python.org/3.8/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.8)">Callable</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="spinnaker_proxy.support.TCPDatagramProtocol">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">spinnaker_proxy.support.</span></code><code class="sig-name descname"><span class="pre">TCPDatagramProtocol</span></code><a class="headerlink" href="#spinnaker_proxy.support.TCPDatagramProtocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.8/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A simple TCP-based protocol for transmitting/receiving datagrams.</p>
+<p>The protocol simply sends datagrams down the TCP connection proceeded by
+a 32-bit (network-order) unsigned integer which gives the length of the
+datagram (in bytes) that follows.</p>
+<dl class="py method">
+<dt id="spinnaker_proxy.support.TCPDatagramProtocol.recv">
+<code class="sig-name descname"><span class="pre">recv</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tcp_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.support.TCPDatagramProtocol.recv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate packets in incoming TCP data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tcp_data</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#bytes" title="(in Python v3.8)"><em>bytes</em></a>) – Raw data read from a TCP socket.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A series of datagrams (possibly none) received from the connection.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.8/library/typing.html#typing.Iterable" title="(in Python v3.8)">Iterable</a>(<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#bytes" title="(in Python v3.8)">bytes</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="spinnaker_proxy.support.TCPDatagramProtocol.send">
+<code class="sig-name descname"><span class="pre">send</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datagram</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.support.TCPDatagramProtocol.send" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encode a datagram for transmission down a TCP socket.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>datagram</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#bytes" title="(in Python v3.8)"><em>bytes</em></a>) – The datagram to encode.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A series of bytes to send down the TCP socket.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#bytes" title="(in Python v3.8)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="spinnaker_proxy.support.tcp_socket">
+<code class="sig-prename descclassname"><span class="pre">spinnaker_proxy.support.</span></code><code class="sig-name descname"><span class="pre">tcp_socket</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bind_port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connect_address</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.support.tcp_socket" title="Permalink to this definition">¶</a></dt>
+<dd><p>How to make a TCP socket.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bind_port</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – If provided, what local port to send and receive data via.</p></li>
+<li><p><strong>connect_address</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>,</em><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>)</em>) – If provided, what remote IP address/port to send data to and
+receive it from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The configured socket.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>socket.SocketType</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="spinnaker_proxy.support.udp_socket">
+<code class="sig-prename descclassname"><span class="pre">spinnaker_proxy.support.</span></code><code class="sig-name descname"><span class="pre">udp_socket</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bind_port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connect_address</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spinnaker_proxy.support.udp_socket" title="Permalink to this definition">¶</a></dt>
+<dd><p>How to make a UDP socket.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bind_port</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – If provided, what local port to send and receive packets via.</p></li>
+<li><p><strong>connect_address</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#tuple" title="(in Python v3.8)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em>,</em><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>)</em>) – If provided, what remote IP address/port to send packets to and
+receive them from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The configured socket.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>socket.SocketType</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-spinnaker_proxy">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-spinnaker_proxy" title="Permalink to this headline">¶</a></h2>
+<p>A simple proxy for enabling SpiNNaker boards to be talked to efficiently    over the open Internet despite the presence of UDP-blocking firewalls    and traffic prioritisation.</p>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">spinnaker_proxy package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-spinnaker_proxy.proxies">spinnaker_proxy.proxies module</a></li>
+<li><a class="reference internal" href="#module-spinnaker_proxy.spinnaker_proxy">spinnaker_proxy.spinnaker_proxy module</a></li>
+<li><a class="reference internal" href="#module-spinnaker_proxy.support">spinnaker_proxy.support module</a></li>
+<li><a class="reference internal" href="#module-spinnaker_proxy">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="modules.html"
+                        title="previous chapter">spinnaker_proxy</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/spinnaker_proxy.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="spinnaker_proxy"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SpiNNaker Network Proxy  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >spinnaker_proxy</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">spinnaker_proxy package</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015, Jonathan Heathcote.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.5.2.
+    </div>
+  </body>
+</html>

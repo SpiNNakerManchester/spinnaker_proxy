@@ -1,0 +1,37 @@
+spinnaker\_proxy package
+========================
+
+Submodules
+----------
+
+spinnaker\_proxy.proxies module
+-------------------------------
+
+.. automodule:: spinnaker_proxy.proxies
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spinnaker\_proxy.spinnaker\_proxy module
+----------------------------------------
+
+.. automodule:: spinnaker_proxy.spinnaker_proxy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spinnaker\_proxy.support module
+-------------------------------
+
+.. automodule:: spinnaker_proxy.support
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: spinnaker_proxy
+   :members:
+   :undoc-members:
+   :show-inheritance:
