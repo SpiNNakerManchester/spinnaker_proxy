@@ -24,7 +24,7 @@ Typical usage is as follows:
                                   .            .
 Where SpiNNaker software is a tool like
 [ybug](https://github.com/SpiNNakerManchester/spinnaker_tools) or
-[sPyNNaker](https://github.com/SpiNNakerManchester/sPyNNaker8).
+[sPyNNaker](https://github.com/SpiNNakerManchester/sPyNNaker).
 
 By transmitting boot packets using a different port number between the proxy
 client and server, the packets are not stripped out by most ISPs. Further, the
