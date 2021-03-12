@@ -79,9 +79,7 @@ def run_proxies(datagram_proxies, event=None):
             p.close()
 
 
-def _main_program():
-    """ The main program. Assumes that it is only ever called from this file.
-    """
+def _parse_arguments(args=None):
     parser = argparse.ArgumentParser(
         description="A 'tunnel' proxy for connecting to remote SpiNNaker "
         "boards.")
@@ -117,7 +115,13 @@ def _main_program():
     parser.add_argument("-q", "--quiet", action="store_true",
                         help="don't print the connection log")
 
-    args = parser.parse_args()
+    return parser.parse_args(args=args)
+
+
+def _main_program():
+    """ The main program. Assumes that it is only ever called from this file.
+    """
+    args = _parse_arguments()
 
     if not args.quiet:
         logging.basicConfig(level=logging.INFO)
